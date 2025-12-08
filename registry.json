@@ -2,6 +2,17 @@
   "version": 1,
   "plugins": [
     {
+      "id": "catwalk",
+      "name": "Catwalk",
+      "version": "1.0.0",
+      "author": "MannuVilasara",
+      "description": "A cute animated cat for your bar.",
+      "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+      "minNoctaliaVersion": "3.6.0",
+      "license": "MIT",
+      "lastUpdated": "2025-12-08T11:23:44+05:30"
+    },
+    {
       "id": "hello-world",
       "name": "Hello World",
       "version": "1.0.1",
