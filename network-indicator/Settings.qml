@@ -11,17 +11,17 @@ ColumnLayout {
     property var cfg: pluginApi?.pluginSettings || ({})
     property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
 
-    property string arrowType: cfg.arrowType || defaults.arrowType
-    property int minWidth: cfg.minWidth || defaults.minWidth
+    property string arrowType: cfg.arrowType ?? defaults.arrowType
+    property int minWidth: cfg.minWidth ?? defaults.minWidth
 
-    property bool useCustomColors: cfg.useCustomColors || defaults.useCustomColors
-    property bool showNumbers: cfg.showNumbers || defaults.showNumbers
-    property bool forceMegabytes: cfg.forceMegabytes || defaults.forceMegabytes
+    property bool useCustomColors: cfg.useCustomColors ?? defaults.useCustomColors
+    property bool showNumbers: cfg.showNumbers ?? defaults.showNumbers
+    property bool forceMegabytes: cfg.forceMegabytes ?? defaults.forceMegabytes
 
-    property color colorSilent: root.useCustomColors && (cfg.colorSilent || defaults.colorSilent) || Color.mSurfaceVariant
-    property color colorTx: cfg.colorTx || defaults.colorTx || Color.mSecondary
-    property color colorRx: cfg.colorRx || defaults.colorRx || Color.mPrimary
-    property color colorText: cfg.colorText || defaults.colorText || Qt.alpha(Color.mOnSurfaceVariant, 0.3)
+    property color colorSilent: root.useCustomColors && cfg.colorSilent || Color.mSurfaceVariant
+    property color colorTx: root.useCustomColors && cfg.colorTx || Color.mSecondary
+    property color colorRx: root.useCustomColors && cfg.colorRx || Color.mPrimary
+    property color colorText: root.useCustomColors && cfg.colorText || Qt.alpha(Color.mOnSurfaceVariant, 0.3)
 
     property int byteThresholdActive: cfg.byteThresholdActive || defaults.byteThresholdActive
     property real fontSizeModifier: cfg.fontSizeModifier || defaults.fontSizeModifier
@@ -104,11 +104,7 @@ ColumnLayout {
 
         checked: root.showNumbers
         onToggled: function (checked) {
-            if (checked) {
-                root.showNumbers = true;
-            } else {
-                root.showNumbers = false;
-            }
+            root.showNumbers = checked;
         }
     }
 
@@ -119,11 +115,7 @@ ColumnLayout {
 
         checked: root.forceMegabytes
         onToggled: function (checked) {
-            if (checked) {
-                root.forceMegabytes = true;
-            } else {
-                root.forceMegabytes = false;
-            }
+            root.forceMegabytes = checked;
         }
     }
 
@@ -290,10 +282,12 @@ ColumnLayout {
         pluginApi.pluginSettings.iconSizeModifier = root.iconSizeModifier;
         pluginApi.pluginSettings.spacingInbetween = root.spacingInbetween;
 
-        pluginApi.pluginSettings.colorSilent = root.colorSilent.toString();
-        pluginApi.pluginSettings.colorTx = root.colorTx.toString();
-        pluginApi.pluginSettings.colorRx = root.colorRx.toString();
-        pluginApi.pluginSettings.colorText = root.colorText.toString();
+        if (root.useCustomColors) {
+            pluginApi.pluginSettings.colorSilent = root.colorSilent.toString();
+            pluginApi.pluginSettings.colorTx = root.colorTx.toString();
+            pluginApi.pluginSettings.colorRx = root.colorRx.toString();
+            pluginApi.pluginSettings.colorText = root.colorText.toString();
+        }
 
         pluginApi.saveSettings();
 

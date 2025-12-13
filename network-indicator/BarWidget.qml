@@ -22,19 +22,19 @@ Rectangle {
     property string arrowType: cfg.arrowType || defaults.arrowType || "chevron"
     property int minWidth: cfg.minWidth || defaults.minWidth || 0
 
-    property bool useCustomColors: cfg.useCustomColors || defaults.useCustomColors
-    property bool showNumbers: cfg.showNumbers || defaults.showNumbers
-    property bool forceMegabytes: cfg.forceMegabytes || defaults.forceMegabytes
+    property bool useCustomColors: cfg.useCustomColors ?? defaults.useCustomColors
+    property bool showNumbers: cfg.showNumbers ?? defaults.showNumbers
+    property bool forceMegabytes: cfg.forceMegabytes ?? defaults.forceMegabytes
 
-    property color colorSilent: root.useCustomColors && (cfg.colorSilent || defaults.colorSilent) || Color.mSurfaceVariant
-    property color colorTx: root.useCustomColors && (cfg.colorTx || defaults.colorTx) || Color.mSecondary
-    property color colorRx: root.useCustomColors && (cfg.colorRx || defaults.colorRx) || Color.mPrimary
-    property color colorText: root.useCustomColors && (cfg.colorText || defaults.colorText) || Qt.alpha(Color.mOnSurfaceVariant, 0.3)
+    property color colorSilent: root.useCustomColors && cfg.colorSilent || Color.mSurfaceVariant
+    property color colorTx: root.useCustomColors && cfg.colorTx || Color.mSecondary
+    property color colorRx: root.useCustomColors && cfg.colorRx || Color.mPrimary
+    property color colorText: root.useCustomColors && cfg.colorText || Qt.alpha(Color.mOnSurfaceVariant, 0.3)
 
     property int byteThresholdActive: cfg.byteThresholdActive || defaults.byteThresholdActive || 1024
     property real fontSizeModifier: cfg.fontSizeModifier || defaults.fontSizeModifier || 1
     property real iconSizeModifier: cfg.iconSizeModifier || defaults.iconSizeModifier || 1
-    property real spacingInbetween: cfg.spacingInbetween || defaults.spacingInbetween || 1
+    property real spacingInbetween: cfg.spacingInbetween || defaults.spacingInbetween || 0
 
     property string barPosition: Settings.data.bar.position || "top"
     property string barDensity: Settings.data.bar.density || "compact"
@@ -67,7 +67,6 @@ Rectangle {
                 color: root.colorText
                 pointSize: Style.fontSizeXS * 0.75 * root.fontSizeModifier
                 font.weight: Font.Medium
-                horizontalAlignment: Text.AlignLeft
             }
 
             NText {
@@ -76,7 +75,6 @@ Rectangle {
                 color: root.colorText
                 pointSize: Style.fontSizeXS * 0.75 * root.fontSizeModifier
                 font.weight: Font.Medium
-                horizontalAlignment: Text.AlignLeft
             }
         }
 
@@ -115,6 +113,6 @@ Rectangle {
         }
 
         const text = value.toFixed(1) + " " + unit;
-        return text.padStart(9, " ");
+        return text.padStart(10, " ");
     }
 }
