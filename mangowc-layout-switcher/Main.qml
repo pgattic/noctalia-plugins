@@ -8,14 +8,45 @@ Item {
 
   property var pluginApi: null
 
-  // Public Data Store
+  // ===== PUBLIC DATA =====
+
   property var monitorLayouts: ({})
   property var availableLayouts: []
   property var availableMonitors: []
 
-  // Internal Logic & Queue
+  // ===== CONSTANTS =====
+
+  // Layout Name Mapping
+  // Codes based on 'mmsg -L' output
+  readonly property var layoutNames: ({
+    "S": "Scroller",
+    "T": "Tile",
+    "G": "Grid",
+    "M": "Monocle",
+    "K": "Deck",
+    "CT": "Center Tile",
+    "RT": "Right Tile",
+    "VS": "Vertical Scroller",
+    "VT": "Vertical Tile",
+    "VG": "Vertical Grid",
+    "VK": "Vertical Deck",
+    "TG": "Tgmix"
+  })
+
+  // ===== HELPER FUNCTIONS =====
+
+  function getLayoutName(code) {
+    if (root.layoutNames[code]) return root.layoutNames[code]
+    
+    // Fallback formatter for unknown codes (snake_case -> Title Case)
+    return code.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+  }
+
+  // ===== INTERNAL LOGIC =====
+
   QtObject {
     id: internal
+
     property var fetchQueue: []
     property bool busy: false
 
@@ -40,6 +71,8 @@ Item {
       layoutFetcher.running = true
     }
   }
+
+  // ===== PROCESSES =====
 
   // 1. Event Watcher (mmsg -w) - Realtime Updates
   Process {
@@ -68,7 +101,7 @@ Item {
       onRead: line => internal.updateLayout(layoutFetcher.targetMonitor, line)
     }
     
-    onExited: {
+    onExited: exitCode => {
       internal.busy = false
       internal.processQueue()
     }
@@ -79,15 +112,18 @@ Item {
     id: layoutsQuery
     command: ["mmsg", "-L"]
     running: false
+    
     stdout: SplitParser {
       onRead: line => {
         const code = line.trim()
         if (code && code.length > 0 && !root.availableLayouts.some(l => l.code === code)) {
-          root.availableLayouts.push({ code: code, name: code })
+           const name = root.getLayoutName(code)
+           root.availableLayouts.push({ code: code, name: name })
         }
       }
     }
-    onExited: { 
+    
+    onExited: exitCode => { 
       if (exitCode === 0) root.availableLayoutsChanged() 
     }
   }
@@ -97,6 +133,7 @@ Item {
     id: monitorsQuery
     command: ["mmsg", "-O"]
     running: false
+    
     stdout: SplitParser {
       onRead: line => {
         const m = line.trim()
@@ -105,7 +142,8 @@ Item {
         }
       }
     }
-    onExited: {
+    
+    onExited: exitCode => {
       if (exitCode === 0) {
         root.availableMonitorsChanged()
         // Queue a fetch for each detected monitor
@@ -115,18 +153,7 @@ Item {
     }
   }
 
-  // IPC Handler
-  IpcHandler {
-    target: "plugin:mangowc-layout-switcher"
-    function setLayout(layoutCode) {
-      if (root.availableMonitors.length > 0) {
-        root.setLayout(root.availableMonitors[0], layoutCode)
-      }
-    }
-    function refresh() { root.refresh() }
-  }
-
-  // ===== API =====
+  // ===== PUBLIC API =====
 
   function refresh() {
     root.availableLayouts = []

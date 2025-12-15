@@ -8,14 +8,18 @@ Item {
   id: root
 
   property var pluginApi: null
-  readonly property var geometryPlaceholder: panelContainer
   property ShellScreen currentScreen
+  
+  readonly property var geometryPlaceholder: panelContainer
+
+  // ===== DATA BINDING =====
 
   // Determine monitor
   readonly property string panelMonitor: {
     if (currentScreen && currentScreen.name) return currentScreen.name
     if (pluginApi && pluginApi.currentScreen && pluginApi.currentScreen.name) return pluginApi.currentScreen.name
-    // Fallback
+    
+    // Fallback to first available monitor
     if (pluginApi && pluginApi.mainInstance && pluginApi.mainInstance.availableMonitors.length > 0) {
       return pluginApi.mainInstance.availableMonitors[0]
     }
@@ -25,15 +29,21 @@ Item {
   readonly property var layouts: pluginApi?.mainInstance?.availableLayouts || []
   readonly property string activeLayout: pluginApi?.mainInstance?.getMonitorLayout(panelMonitor) || ""
 
+  // ===== SETTINGS =====
+
   property bool applyToAll: false
-  property real contentPreferredWidth: 400 * Style.uiScaleRatio
-  property real contentPreferredHeight: 320 * Style.uiScaleRatio
+  
+  // Increased size to accommodate Symbol + Text comfortably
+  property real contentPreferredWidth: 460 * Style.uiScaleRatio 
+  property real contentPreferredHeight: 360 * Style.uiScaleRatio
 
   Component.onCompleted: {
     if (pluginApi?.mainInstance) {
       pluginApi.mainInstance.refresh()
     }
   }
+
+  // ===== UI CONTENT =====
 
   MouseArea {
     anchors.fill: parent
@@ -44,6 +54,7 @@ Item {
       anchors.centerIn: parent
       width: root.contentPreferredWidth
       height: root.contentPreferredHeight
+      
       color: Color.mSurface
       radius: Style.radiusL
       border.width: 1
@@ -64,14 +75,16 @@ Item {
           color: Color.mOnSurface
         }
 
-        // Options
+        // Options Row
         RowLayout {
           Layout.fillWidth: true
+          
           NText {
             text: "Apply to all monitors"
             color: Color.mOnSurfaceVariant
             pointSize: Style.fontSizeS
           }
+ 
           Item { Layout.fillWidth: true }
           
           NToggle {
@@ -96,14 +109,13 @@ Item {
             delegate: Rectangle {
               id: layoutBtn
               Layout.fillWidth: true
-              Layout.preferredHeight: 45 * Style.uiScaleRatio
+              Layout.preferredHeight: 60 * Style.uiScaleRatio
               
               property bool isActive: modelData.code === root.activeLayout
               property bool isHovered: false
 
-              // Background: Active = Primary, Inactive = SurfaceVariant (No background hover change)
+              // Background: Active = Primary, Inactive = SurfaceVariant
               color: isActive ? Color.mPrimary : Color.mSurfaceVariant
-              
               radius: Style.radiusM
               
               // Border Highlight on Hover (only for inactive items)
@@ -114,11 +126,34 @@ Item {
               Behavior on border.color { ColorAnimation { duration: 150 } }
               Behavior on color { ColorAnimation { duration: 150 } }
 
-              NText {
+              ColumnLayout {
                 anchors.centerIn: parent
-                text: modelData.name
-                color: parent.isActive ? Color.mOnPrimary : Color.mOnSurface
-                font.weight: parent.isActive ? Font.Bold : Font.Normal
+                spacing: 0
+                width: parent.width - (Style.marginS * 2)
+
+                // 1. Symbol / Letter (Large, Bold)
+                NText {
+                  Layout.alignment: Qt.AlignHCenter
+                  text: modelData.code
+                  color: layoutBtn.isActive ? Color.mOnPrimary : Color.mOnSurface
+                  font.weight: Font.Black
+                  pointSize: Style.fontSizeL
+                }
+
+                // 2. Full Name (Small, Regular)
+                NText {
+                  Layout.alignment: Qt.AlignHCenter
+                  Layout.fillWidth: true
+                  horizontalAlignment: Text.AlignHCenter
+                  
+                  text: modelData.name
+                  color: layoutBtn.isActive ? Color.mOnPrimary : Color.mOnSurface
+                  opacity: layoutBtn.isActive ? 1.0 : 0.7 // Visual hierarchy
+                  
+                  font.weight: Font.Medium
+                  pointSize: Style.fontSizeXS
+                  elide: Text.ElideRight
+                }
               }
 
               MouseArea {

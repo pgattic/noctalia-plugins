@@ -5,56 +5,52 @@ import qs.Modules.Bar.Extras
 import qs.Services.UI
 import qs.Widgets
 
-Rectangle {
+Item {
   id: root
 
+  // ===== REQUIRED PROPERTIES =====
+  // These MUST be defined for the shell loader to inject location data correctly.
+  
   property var pluginApi: null
   property ShellScreen screen
   property string widgetId: ""
-  
-  property var widgetMetadata: BarWidgetRegistry.widgetMetadata[widgetId]
-  property var widgetSettings: ({})
+  property string section: ""
+  property int sectionWidgetIndex: -1
+  property int sectionWidgetsCount: 0
 
-  // Reactive binding to Main.qml data
-  property string rawLayout: pluginApi?.mainInstance?.getMonitorLayout(screen?.name) || "?"
-  
-  property string displayLetter: {
-    if (rawLayout && rawLayout.length > 0 && rawLayout !== "?") {
-      return rawLayout.substring(0, 1).toUpperCase()
-    }
-    return "?"
-  }
+  // ===== DATA BINDING =====
 
-  implicitWidth: layoutText.implicitWidth + Style.marginM * 2
-  implicitHeight: Style.barHeight
+  // Safe access to main instance to prevent startup errors
+  readonly property string layoutCode: pluginApi?.mainInstance?.getMonitorLayout(screen?.name) || "?"
+  readonly property string layoutName: pluginApi?.mainInstance?.getLayoutName(layoutCode) || layoutCode
 
-  color: Style.capsuleColor
-  radius: Style.radiusM
+  // ===== SIZING =====
 
-  NText {
-    id: layoutText
-    anchors.centerIn: parent
-    text: root.displayLetter
-    color: Color.mOnSurface
-    pointSize: Style.fontSizeS
-    font.weight: Font.Bold
-  }
+  // Bind the size to the pill so it reserves correct space in the bar
+  implicitWidth: pill.width
+  implicitHeight: pill.height
 
-  MouseArea {
-    anchors.fill: parent
-    cursorShape: Qt.PointingHandCursor
-    hoverEnabled: true
+  // ===== COMPONENT =====
+
+  // Uses the native Noctalia component for perfect consistency
+  BarPill {
+    id: pill
+
+    // Pass the shell/screen properties
+    screen: root.screen
+    density: Settings.data.bar.density
     
-    onEntered: {
-      root.color = Qt.lighter(Style.capsuleColor, 1.2)
-      TooltipService.show(root, "Layout: " + root.rawLayout, BarService.getTooltipDirection())
-    }
+    // Automatically calculate direction based on the 'section' property
+    oppositeDirection: BarService.getPillDirection(root)
+
+    // Content: Static Icon + Dynamic Text (Layout Name)
+    icon: "layout-dashboard"
+    text: root.layoutName
     
-    onExited: {
-      root.color = Style.capsuleColor
-      TooltipService.hide()
-    }
-    
+    // Tooltip for accessibility
+    tooltipText: "Layout: " + root.layoutName
+
+    // Interaction: Open panel on click
     onClicked: {
       if (pluginApi) pluginApi.openPanel(root.screen)
     }
