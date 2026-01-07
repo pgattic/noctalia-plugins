@@ -137,16 +137,45 @@ ColumnLayout {
 
       ListModel {
         id: currencyModel
-        ListElement { name: "🇧🇷 Real Brasileiro (R$)"; key: "br" }
-        ListElement { name: "🇺🇸 Dólar Americano (USD)"; key: "us" }
-        ListElement { name: "🇪🇺 Euro (EUR)"; key: "eu" }
         ListElement { name: "🇦🇷 Peso Argentino (ARS)"; key: "ar" }
-        ListElement { name: "🇲🇽 Peso Mexicano (MXN)"; key: "mx" }
-        ListElement { name: "🇨🇱 Peso Chileno (CLP)"; key: "cl" }
-        ListElement { name: "🇨🇴 Peso Colombiano (COP)"; key: "co" }
-        ListElement { name: "🇬🇧 Libra Esterlina (GBP)"; key: "gb" }
-        ListElement { name: "🇨🇦 Dólar Canadense (CAD)"; key: "ca" }
         ListElement { name: "🇦🇺 Dólar Australiano (AUD)"; key: "au" }
+        ListElement { name: "🇧🇷 Real Brasileiro (BRL)"; key: "br" }
+        ListElement { name: "🇨🇦 Dólar Canadense (CAD)"; key: "ca" }
+        ListElement { name: "🇨🇭 Franco Suíço (CHF)"; key: "ch" }
+        ListElement { name: "🇨🇱 Peso Chileno (CLP)"; key: "cl" }
+        ListElement { name: "🇨🇳 Yuan Chinês (CNY)"; key: "cn" }
+        ListElement { name: "🇨🇴 Peso Colombiano (COP)"; key: "co" }
+        ListElement { name: "🇨🇷 Colón Costarricense (CRC)"; key: "cr" }
+        ListElement { name: "🇪🇺 Euro (EUR)"; key: "eu" }
+        ListElement { name: "🇬🇧 Libra Esterlina (GBP)"; key: "gb" }
+        ListElement { name: "🇭🇰 Dólar de Hong Kong (HKD)"; key: "hk" }
+        ListElement { name: "🇮🇩 Rupia Indonésia (IDR)"; key: "id" }
+        ListElement { name: "🇮🇱 Novo Shekel Israelense (ILS)"; key: "il" }
+        ListElement { name: "🇮🇳 Rupia Indiana (INR)"; key: "in" }
+        ListElement { name: "🇯🇵 Iene Japonês (JPY)"; key: "jp" }
+        ListElement { name: "🇰🇷 Won Sul-Coreano (KRW)"; key: "kr" }
+        ListElement { name: "🇰🇼 Dinar Kuwaitiano (KWD)"; key: "kw" }
+        ListElement { name: "🇰🇿 Tenge Cazaque (KZT)"; key: "kz" }
+        ListElement { name: "🇲🇽 Peso Mexicano (MXN)"; key: "mx" }
+        ListElement { name: "🇲🇾 Ringgit Malaio (MYR)"; key: "my" }
+        ListElement { name: "🇳🇴 Coroa Norueguesa (NOK)"; key: "no" }
+        ListElement { name: "🇳🇿 Dólar Neozelandês (NZD)"; key: "nz" }
+        ListElement { name: "🇵🇪 Sol Peruano (PEN)"; key: "pe" }
+        ListElement { name: "🇵🇭 Peso Filipino (PHP)"; key: "ph" }
+        ListElement { name: "🇵🇱 Zloty Polonês (PLN)"; key: "pl" }
+        ListElement { name: "🇶🇦 Riyal Catariano (QAR)"; key: "qa" }
+        ListElement { name: "🇷🇺 Rublo Russo (RUB)"; key: "ru" }
+        ListElement { name: "🇸🇦 Riyal Saudita (SAR)"; key: "sa" }
+        ListElement { name: "🇸🇪 Coroa Sueca (SEK)"; key: "se" }
+        ListElement { name: "🇸🇬 Dólar de Singapura (SGD)"; key: "sg" }
+        ListElement { name: "🇹🇭 Baht Tailandês (THB)"; key: "th" }
+        ListElement { name: "🇹🇷 Lira Turca (TRY)"; key: "tr" }
+        ListElement { name: "🇹🇼 Dólar de Taiwan (TWD)"; key: "tw" }
+        ListElement { name: "🇺🇦 Hryvnia Ucraniana (UAH)"; key: "ua" }
+        ListElement { name: "🇺🇸 Dólar Americano (USD)"; key: "us" }
+        ListElement { name: "🇺🇾 Peso Uruguaio (UYU)"; key: "uy" }
+        ListElement { name: "🇻🇳 Dong Vietnamita (VND)"; key: "vn" }
+        ListElement { name: "🇿🇦 Rand Sul-Africano (ZAR)"; key: "za" }
       }
 
       NComboBox {
@@ -160,14 +189,120 @@ ColumnLayout {
             
             // Define o símbolo da moeda
             var symbols = {
-              "br": "R$", "us": "$", "eu": "€", "ar": "ARS$",
-              "mx": "MXN$", "cl": "CLP$", "co": "COP$",
-              "gb": "£", "ca": "CAD$", "au": "AUD$"
+              "ar": "ARS$", "au": "A$", "br": "R$", "ca": "CA$", "ch": "CHF",
+              "cl": "CLP$", "cn": "¥", "co": "COL$", "cr": "₡", "eu": "€",
+              "gb": "£", "hk": "HK$", "id": "Rp", "il": "₪", "in": "₹",
+              "jp": "¥", "kr": "₩", "kw": "KD", "kz": "₸", "mx": "Mex$",
+              "my": "RM", "no": "kr", "nz": "NZ$", "pe": "S/", "ph": "₱",
+              "pl": "zł", "qa": "QR", "ru": "₽", "sa": "SR", "se": "kr",
+              "sg": "S$", "th": "฿", "tr": "₺", "tw": "NT$", "ua": "₴",
+              "us": "$", "uy": "$U", "vn": "₫", "za": "R"
             };
             pluginApi.pluginSettings.currencySymbol = symbols[key] || "$";
             pluginApi.saveSettings();
           }
         }
+      }
+    }
+  }
+
+  // Wishlist Import section
+  NBox {
+    Layout.fillWidth: true
+    Layout.preferredHeight: wishlistImportContent.implicitHeight + Style.marginM * 2
+    color: Color.mSurfaceVariant
+
+    property bool importing: false
+    property string importStatus: ""
+
+    ColumnLayout {
+      id: wishlistImportContent
+      anchors.fill: parent
+      anchors.margins: Style.marginM
+      spacing: Style.marginS
+
+      NText {
+        text: pluginApi?.tr("steam-price-watcher.settings.import-wishlist") || "Importar Wishlist do Steam"
+        pointSize: Style.fontSizeL
+        font.weight: Style.fontWeightBold
+        color: Color.mOnSurface
+      }
+
+      NText {
+        text: pluginApi?.tr("steam-price-watcher.settings.import-description") ||
+          "Importe sua wishlist diretamente do Steam. Insira seu Steam ID ou nome de usuário personalizado."
+        color: Color.mOnSurfaceVariant
+        pointSize: Style.fontSizeS
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+
+        NTextInput {
+          id: steamIdInput
+          Layout.fillWidth: true
+          Layout.preferredHeight: Style.baseWidgetSize
+          placeholderText: pluginApi?.tr("steam-price-watcher.settings.steam-id-placeholder") ||
+            "Ex: 76561198012345678 ou seu_username"
+        }
+
+        NButton {
+          text: pluginApi?.tr("steam-price-watcher.settings.import") || "Importar"
+          enabled: !parent.parent.parent.importing && steamIdInput.text.trim().length > 0
+          onClicked: {
+            if (steamIdInput.text.trim().length > 0) {
+              importWishlist(steamIdInput.text.trim());
+            }
+          }
+        }
+      }
+
+      // Status messages
+      NText {
+        visible: parent.parent.importing
+        text: pluginApi?.tr("steam-price-watcher.settings.importing") || "Importando wishlist..."
+        color: Color.mOnSurfaceVariant
+        pointSize: Style.fontSizeM
+        Layout.fillWidth: true
+
+        NIcon {
+          anchors.left: parent.left
+          anchors.leftMargin: -25
+          anchors.verticalCenter: parent.verticalCenter
+          icon: "loader"
+          pointSize: Style.fontSizeM
+          color: Color.mPrimary
+
+          RotationAnimator on rotation {
+            running: wishlistImportContent.parent.importing
+            from: 0
+            to: 360
+            duration: 1000
+            loops: Animation.Infinite
+          }
+        }
+      }
+
+      NText {
+        visible: parent.parent.importStatus.length > 0 && !parent.parent.importing
+        text: parent.parent.importStatus
+        color: parent.parent.importStatus.includes("sucesso") || parent.parent.importStatus.includes("success") ?
+          Color.mPrimary : Color.mError
+        pointSize: Style.fontSizeS
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
+      }
+
+      NText {
+        text: pluginApi?.tr("steam-price-watcher.settings.wishlist-note") ||
+          "⚠️ Nota: Seu perfil Steam deve estar público para que a importação funcione."
+        color: Color.mOnSurfaceVariant
+        pointSize: Style.fontSizeXS
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
       }
     }
   }
@@ -889,6 +1024,190 @@ ColumnLayout {
         }
       }
     }
+  }
+
+  // Import wishlist from Steam
+  property var wishlistImportBox: null
+
+  Component.onCompleted: {
+    // Find the wishlist import box to update its properties
+    for (var i = 0; i < root.children.length; i++) {
+      if (root.children[i].toString().indexOf("wishlistImportContent") !== -1) {
+        wishlistImportBox = root.children[i];
+        break;
+      }
+    }
+  }
+
+  function importWishlist(steamId) {
+    // Find the wishlist import NBox
+    var importBox = null;
+    for (var i = 0; i < root.children.length; i++) {
+      if (root.children[i].importing !== undefined) {
+        importBox = root.children[i];
+        break;
+      }
+    }
+
+    if (!importBox) {
+      console.error("Could not find import box");
+      return;
+    }
+
+    importBox.importing = true;
+    importBox.importStatus = "";
+
+    console.log("Steam Price Watcher: Starting wishlist import for", steamId);
+
+    // Try different URL formats
+    var urls = [
+      "https://store.steampowered.com/wishlist/id/" + steamId + "/wishlistdata/",
+      "https://store.steampowered.com/wishlist/profiles/" + steamId + "/wishlistdata/"
+    ];
+
+    tryImportFromUrl(urls, 0, importBox);
+  }
+
+  function tryImportFromUrl(urls, urlIndex, importBox) {
+    if (urlIndex >= urls.length) {
+      importBox.importing = false;
+      importBox.importStatus = pluginApi?.tr("steam-price-watcher.settings.import-failed") ||
+        "❌ Falha ao importar. Verifique se o Steam ID está correto e o perfil está público.";
+      console.log("Steam Price Watcher: All URL attempts failed");
+      return;
+    }
+
+    var url = urls[urlIndex];
+    console.log("Steam Price Watcher: Trying URL", url);
+
+    var process = Qt.createQmlObject(`
+      import Quickshell.Io
+      Process {
+        running: true
+        command: ["curl", "-s", "${url}"]
+        stdout: StdioCollector {}
+
+        onExited: (exitCode) => {
+          if (exitCode === 0 && stdout.text.length > 10) {
+            try {
+              var wishlistData = JSON.parse(stdout.text);
+              var gameIds = Object.keys(wishlistData);
+
+              if (gameIds.length === 0) {
+                console.log("Steam Price Watcher: Empty wishlist, trying next URL");
+                root.tryImportFromUrl(urls, urlIndex + 1, importBox);
+              } else {
+                console.log("Steam Price Watcher: Found", gameIds.length, "games in wishlist");
+                root.processWishlistGames(gameIds, wishlistData, importBox);
+              }
+            } catch (e) {
+              console.error("Steam Price Watcher: Error parsing wishlist:", e);
+              root.tryImportFromUrl(urls, urlIndex + 1, importBox);
+            }
+          } else {
+            console.log("Steam Price Watcher: Failed to fetch, trying next URL");
+            root.tryImportFromUrl(urls, urlIndex + 1, importBox);
+          }
+          destroy();
+        }
+      }
+    `, root, "wishlistProcess");
+  }
+
+  property int wishlistGamesAdded: 0
+  property int wishlistGamesTotal: 0
+
+  function processWishlistGames(gameIds, wishlistData, importBox) {
+    wishlistGamesAdded = 0;
+    wishlistGamesTotal = gameIds.length;
+
+    var added = 0;
+    var skipped = 0;
+
+    for (var i = 0; i < gameIds.length; i++) {
+      var appId = parseInt(gameIds[i]);
+      var gameInfo = wishlistData[gameIds[i]];
+
+      // Check if game is already in watchlist
+      if (isGameInWatchlist(appId)) {
+        skipped++;
+        console.log("Steam Price Watcher: Skipping", gameInfo.name, "- already in watchlist");
+        continue;
+      }
+
+      // Fetch price and add to watchlist
+      fetchWishlistGamePrice(appId, gameInfo.name, importBox);
+    }
+
+    // Update status immediately for skipped games
+    if (skipped === gameIds.length) {
+      importBox.importing = false;
+      importBox.importStatus = pluginApi?.tr("steam-price-watcher.settings.import-all-exist") ||
+        "ℹ️ Todos os jogos da wishlist já estão na sua lista.";
+    }
+  }
+
+  property int pendingWishlistFetches: 0
+
+  function fetchWishlistGamePrice(appId, gameName, importBox) {
+    pendingWishlistFetches++;
+
+    var process = Qt.createQmlObject(`
+      import Quickshell.Io
+      Process {
+        running: true
+        command: ["curl", "-s", "https://store.steampowered.com/api/appdetails?appids=${appId}&cc=${root.currency}"]
+        stdout: StdioCollector {}
+        property int gameAppId: ${appId}
+        property string gameNameStr: "${gameName.replace(/"/g, '\\"').replace(/\n/g, ' ')}"
+
+        onExited: (exitCode) => {
+          if (exitCode === 0) {
+            try {
+              var response = JSON.parse(stdout.text);
+              var appData = response[gameAppId.toString()];
+
+              if (appData && appData.success && appData.data && appData.data.price_overview) {
+                var currentPrice = appData.data.price_overview.final / 100;
+                var targetPrice = currentPrice * 0.8; // 20% discount
+
+                var game = {
+                  appId: gameAppId,
+                  name: appData.data.name || gameNameStr,
+                  targetPrice: targetPrice,
+                  addedDate: new Date().toISOString()
+                };
+
+                // Add to watchlist
+                var temp = root.watchlist.slice();
+                temp.push(game);
+                root.pluginApi.pluginSettings.watchlist = temp;
+                root.pluginApi.saveSettings();
+                root.wishlistGamesAdded++;
+
+                console.log("Steam Price Watcher: Added from wishlist:", game.name, "target:", targetPrice);
+              } else {
+                console.log("Steam Price Watcher: Skipping", gameNameStr, "- no price available");
+              }
+            } catch (e) {
+              console.error("Steam Price Watcher: Error processing game:", e);
+            }
+          }
+
+          root.pendingWishlistFetches--;
+          if (root.pendingWishlistFetches === 0) {
+            importBox.importing = false;
+            if (root.wishlistGamesAdded > 0) {
+              importBox.importStatus = (root.pluginApi?.tr("steam-price-watcher.settings.import-success") || "✅ Importação concluída! {count} jogos adicionados.").replace("{count}", root.wishlistGamesAdded.toString());
+            } else {
+              importBox.importStatus = root.pluginApi?.tr("steam-price-watcher.settings.import-no-games") || "ℹ️ Nenhum jogo com preço foi encontrado na wishlist.";
+            }
+          }
+
+          destroy();
+        }
+      }
+    `, root, "wishlistGameProcess");
   }
 
   // Called when user clicks Apply in settings dialog

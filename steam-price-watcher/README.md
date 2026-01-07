@@ -9,8 +9,10 @@ Monitor Steam game prices and get notified when they reach your target price.
 - 🔔 **Desktop Notifications**: Get notified via notify-send when games reach your target price
 - 📊 **Visual Indicator**: Bar widget shows a notification dot when games are at target price
 - 💰 **Price Comparison**: See current price vs. target price with discount percentages
-- ⚙️ **Easy Configuration**: Search games by Steam App ID and add them to your watchlist
+- ⚙️ **Easy Configuration**: Search games by name or import your Steam wishlist
 - 🔄 **Automatic Updates**: Prices are checked automatically based on your interval setting
+- 🌍 **Multi-Currency**: Support for 40+ Steam currencies
+- 📥 **Wishlist Import**: Import your entire Steam wishlist with one click
 
 ## How to Use
 
@@ -25,13 +27,25 @@ Monitor Steam game prices and get notified when they reach your target price.
 6. Set your target price (the plugin suggests 20% below current price)
 7. Click "Add to Watchlist"
 
+### Import Steam Wishlist
+
+The fastest way to add games:
+
+1. Open the plugin settings
+2. Find the "Import Steam Wishlist" section
+3. Enter your Steam ID or custom URL
+   - Example: `76561198012345678` or `yourusername`
+4. Click "Import"
+5. The plugin will automatically add all games from your wishlist
+   - Target prices are set to 20% below current price
+   - Free games are skipped
+   - Already monitored games are skipped
+
+**Note**: Your Steam profile must be public for import to work.
+
 ### Game Search
 
-Simply type the game name and the plugin will search Steam's database:
-
-### Game Search
-
-Simply type the game name and the plugin will search Steam's database:
+Alternatively, search for individual games:
 
 - **Counter Strike** → Shows CS:GO, CS2, etc.
 - **GTA** → Shows GTA V, GTA IV, etc.
@@ -66,12 +80,16 @@ In the panel (click the widget):
 - **Check Interval**: How often to check prices (15-1440 minutes)
   - Default: 30 minutes
   - ⚠️ Very short intervals may result in many API requests
-- **Watchlist**: Add or remove games from monitoring
+- **Currency**: Choose from 40+ supported Steam currencies
+  - USD, EUR, GBP, BRL, PLN, JPY, CNY, and many more
+- **Wishlist Import**: Import games directly from your Steam wishlist
+- **Game Search**: Search and add individual games manually
 
 ## Technical Details
 
 - **API**: Uses Steam Store API (`store.steampowered.com/api/appdetails`)
-- **Currency**: Prices are fetched in BRL (Brazilian Real)
+- **Wishlist API**: Uses Steam Wishlist API for wishlist imports
+- **Currency**: Supports 40+ currencies (USD, EUR, GBP, BRL, PLN, JPY, CNY, RUB, etc.)
 - **Data Storage**: Settings are stored in Noctalia's plugin configuration
 - **Notifications**: Uses notify-send for desktop notifications
 
@@ -98,6 +116,13 @@ In the panel (click the widget):
 - Chinese Simplified (zh-CN)
 
 ## Changelog
+
+### Version 1.1.0
+
+- Added Steam Wishlist import feature
+- Expanded currency support to 40+ currencies
+- All major Steam-supported currencies now available
+- Improved user experience for adding games in bulk
 
 ### Version 1.0.0
 
@@ -142,8 +167,8 @@ This plugin follows the same license as Noctalia Shell.
 
 Potential features for future versions:
 
-- Support for multiple currencies
-- Price history tracking
-- Historical low price information
+- Price history tracking and charts
+- Historical low price information (integration with SteamDB or ITAD)
 - Steam sale event notifications
-- Wishlist import from Steam
+- Bulk price threshold adjustments
+- Export/import watchlist to JSON
