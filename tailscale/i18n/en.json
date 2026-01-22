@@ -17,7 +17,10 @@
     "disconnect": "Disconnect",
     "refresh": "Refresh Status",
     "not-installed": "Tailscale not installed",
-    "settings": "Settings"
+    "settings": "Settings",
+    "copy-ip": "Copy IP",
+    "ssh": "SSH to host",
+    "ping": "Ping host"
   },
   "toast": {
     "title": "Tailscale",

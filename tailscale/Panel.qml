@@ -20,6 +20,83 @@ Item {
     Quickshell.execDetached(["sh", "-c", "printf '%s' '" + escaped + "' | wl-copy"])
   }
 
+  // Shared state for context menu
+  property var selectedPeer: null
+  property var selectedPeerDelegate: null
+
+  function openPeerContextMenu(peer, delegate, mouseX, mouseY) {
+    selectedPeer = peer
+    selectedPeerDelegate = delegate
+    peerContextMenu.openAtItem(delegate, mouseX, mouseY)
+  }
+
+  function copySelectedPeerIp() {
+    if (selectedPeer) {
+      var ips = selectedPeer.TailscaleIPs?.filter(ip => ip.startsWith("100.")) || []
+      if (ips.length > 0) {
+        copyToClipboard(ips[0])
+        ToastService.showNotice(
+          pluginApi?.tr("toast.ip-copied.title") || "IP Copied",
+          ips[0],
+          "clipboard"
+        )
+      }
+    }
+  }
+
+  function sshToSelectedPeer() {
+    if (selectedPeer) {
+      var ips = selectedPeer.TailscaleIPs?.filter(ip => ip.startsWith("100.")) || []
+      if (ips.length > 0) {
+        Quickshell.execDetached(["ghostty", "-e", "ssh", ips[0]])
+      }
+    }
+  }
+
+  function pingSelectedPeer() {
+    if (selectedPeer) {
+      var ips = selectedPeer.TailscaleIPs?.filter(ip => ip.startsWith("100.")) || []
+      if (ips.length > 0) {
+        Quickshell.execDetached(["ghostty", "-e", "ping", "-c", "5", ips[0]])
+      }
+    }
+  }
+
+  NContextMenu {
+    id: peerContextMenu
+    model: [
+      { 
+        label: pluginApi?.tr("context.copy-ip") || "Copy IP", 
+        action: "copy-ip", 
+        icon: "clipboard" 
+      },
+      { 
+        label: pluginApi?.tr("context.ssh") || "SSH to host", 
+        action: "ssh", 
+        icon: "terminal",
+        enabled: root.selectedPeer?.Online || false
+      },
+      { 
+        label: pluginApi?.tr("context.ping") || "Ping host", 
+        action: "ping", 
+        icon: "activity"
+      }
+    ]
+    onTriggered: function(action) {
+      switch (action) {
+        case "copy-ip":
+          root.copySelectedPeerIp()
+          break
+        case "ssh":
+          root.sshToSelectedPeer()
+          break
+        case "ping":
+          root.pingSelectedPeer()
+          break
+      }
+    }
+  }
+
   onPluginApiChanged: {
     if (pluginApi && pluginApi.mainInstance) {
       mainInstanceChanged()
@@ -136,8 +213,11 @@ Item {
             clip: true
             contentWidth: width
             contentHeight: peerListColumn.height
+            interactive: contentHeight > height
+            boundsBehavior: Flickable.StopAtBounds
+            pressDelay: 0
 
-            ColumnLayout {
+              ColumnLayout {
               id: peerListColumn
               width: peerFlickable.width
               spacing: Style.marginS
@@ -145,31 +225,47 @@ Item {
               Repeater {
                 model: sortedPeerList
 
-                delegate: Rectangle {
-                  width: peerFlickable.width
-                  height: 40
-                  color: mouseArea.containsMouse ? Qt.alpha(Color.mPrimary, 0.1) : "transparent"
-                  radius: Style.radiusM
+                delegate: ItemDelegate {
+                  id: peerDelegate
+                  Layout.fillWidth: true
+                  Layout.preferredWidth: peerFlickable.width
+                  implicitWidth: peerFlickable.width
+                  height: 48
+                  topPadding: Style.marginS
+                  bottomPadding: Style.marginS
+                  leftPadding: Style.marginL
+                  rightPadding: Style.marginL
 
-                  RowLayout {
-                    id: peerRow
-                    anchors {
-                      left: parent.left
-                      right: parent.right
-                      verticalCenter: parent.verticalCenter
-                      leftMargin: Style.marginM
-                      rightMargin: Style.marginM
+                  readonly property var peerData: modelData
+                  readonly property string peerIp: {
+                    var ips = []
+                    if (peerData.TailscaleIPs && peerData.TailscaleIPs.length > 0) {
+                      ips = peerData.TailscaleIPs.filter(ip => ip.startsWith("100."))
                     }
+                    return ips.length > 0 ? ips[0] : ""
+                  }
+                  readonly property string peerHostname: peerData.HostName || peerData.DNSName || "Unknown"
+                  readonly property bool peerOnline: peerData.Online || false
+
+                  background: Rectangle {
+                    anchors.fill: parent
+                    color: peerDelegate.hovered ? Qt.alpha(Color.mPrimary, 0.1) : "transparent"
+                    radius: Style.radiusM
+                    border.width: peerDelegate.hovered ? 1 : 0
+                    border.color: Qt.alpha(Color.mPrimary, 0.3)
+                  }
+
+                  contentItem: RowLayout {
                     spacing: Style.marginM
 
                     NIcon {
-                      icon: modelData.Online ? "circle-check" : "circle-x"
+                      icon: peerDelegate.peerOnline ? "circle-check" : "circle-x"
                       pointSize: Style.fontSizeM
-                      color: modelData.Online ? Color.mPrimary : Color.mOnSurfaceVariant
+                      color: peerDelegate.peerOnline ? Color.mPrimary : Color.mOnSurfaceVariant
                     }
 
                     NText {
-                      text: modelData.HostName || modelData.DNSName || "Unknown"
+                      text: peerDelegate.peerHostname
                       color: Color.mOnSurface
                       font.weight: Style.fontWeightMedium
                       elide: Text.ElideRight
@@ -177,44 +273,29 @@ Item {
                     }
 
                     NText {
-                      id: peerIpText
-                      text: {
-                        var ips = []
-                        if (modelData.TailscaleIPs && modelData.TailscaleIPs.length > 0) {
-                          ips = modelData.TailscaleIPs.filter(ip => ip.startsWith("100."))
-                        }
-                        return ips.length > 0 ? ips[0] : ""
-                      }
+                      text: peerDelegate.peerIp
                       pointSize: Style.fontSizeS
-                      color: peerIpMouseArea.containsMouse ? Color.mPrimary : Color.mOnSurfaceVariant
+                      color: Color.mOnSurfaceVariant
                       font.family: Settings.data.ui.fontFixed
-                      visible: modelData.TailscaleIPs && modelData.TailscaleIPs.length > 0
-                      
-                      MouseArea {
-                        id: peerIpMouseArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: function(mouse) {
-                          mouse.accepted = true
-                          if (peerIpText.text) {
-                            root.copyToClipboard(peerIpText.text)
-                            ToastService.showNotice(
-                              pluginApi?.tr("toast.ip-copied.title") || "IP Copied",
-                              peerIpText.text,
-                              "clipboard"
-                            )
-                          }
-                        }
-                      }
+                      visible: peerDelegate.peerIp !== ""
+                      Layout.alignment: Qt.AlignRight
                     }
                   }
 
-                  MouseArea {
-                    id: mouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
+                  onClicked: {
+                    if (peerDelegate.peerIp) {
+                      root.copyToClipboard(peerDelegate.peerIp)
+                      ToastService.showNotice(
+                        pluginApi?.tr("toast.ip-copied.title") || "IP Copied",
+                        peerDelegate.peerIp,
+                        "clipboard"
+                      )
+                    }
+                  }
+
+                  TapHandler {
+                    acceptedButtons: Qt.RightButton
+                    onTapped: root.openPeerContextMenu(peerDelegate.peerData, peerDelegate, point.position.x, point.position.y)
                   }
                 }
               }
