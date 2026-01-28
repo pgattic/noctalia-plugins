@@ -457,13 +457,13 @@ Item {
                       id: highPriorityBtn
                       width: (parent.width - 2) / 3
                       height: parent.height
-                      color: priorityGroup.currentPriority === "high" ? Color.mError : "transparent"
+                      color: priorityGroup.currentPriority === "high" ? getPriorityColor("high") : "transparent"
                       radius: Style.iRadiusS
 
                       NText {
                         anchors.centerIn: parent
                         text: "H"
-                        color: priorityGroup.currentPriority === "high" ? Color.mOnPrimary : Color.mError
+                        color: priorityGroup.currentPriority === "high" ? Color.mOnPrimary : getPriorityColor("high")
                         font.pointSize: Style.fontSizeS
                       }
 
@@ -477,13 +477,13 @@ Item {
                       id: mediumPriorityBtn
                       width: (parent.width - 2) / 3
                       height: parent.height
-                      color: priorityGroup.currentPriority === "medium" ? Color.mPrimary : "transparent"
+                      color: priorityGroup.currentPriority === "medium" ? getPriorityColor("medium") : "transparent"
                       radius: Style.iRadiusS
 
                       NText {
                         anchors.centerIn: parent
                         text: "M"
-                        color: priorityGroup.currentPriority === "medium" ? Color.mOnPrimary : Color.mPrimary
+                        color: priorityGroup.currentPriority === "medium" ? Color.mOnPrimary : getPriorityColor("medium")
                         font.pointSize: Style.fontSizeS
                       }
 
@@ -497,13 +497,13 @@ Item {
                       id: lowPriorityBtn
                       width: parent.width - (highPriorityBtn.width + mediumPriorityBtn.width + 2)
                       height: parent.height
-                      color: priorityGroup.currentPriority === "low" ? Color.mOnSurfaceVariant : "transparent"
+                      color: priorityGroup.currentPriority === "low" ? getPriorityColor("low") : "transparent"
                       radius: Style.iRadiusS
 
                       NText {
                         anchors.centerIn: parent
                         text: "L"
-                        color: priorityGroup.currentPriority === "low" ? Color.mOnSurface : Color.mOnSurfaceVariant
+                        color: priorityGroup.currentPriority === "low" ? Color.mOnPrimary : getPriorityColor("low")
                         font.pointSize: Style.fontSizeS
                       }
 
