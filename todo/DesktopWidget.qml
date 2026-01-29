@@ -132,6 +132,8 @@ DraggableDesktopWidget {
       Layout.fillWidth: true
       visible: expanded
       Layout.topMargin: scaledMarginS
+      Layout.leftMargin: scaledMarginM
+      Layout.rightMargin: scaledMarginM
       distributeEvenly: true
       currentIndex: currentPageIndex
       color: "transparent"
@@ -162,14 +164,25 @@ DraggableDesktopWidget {
                  (isHovered ? Color.mHover : (checked ? Color.mPrimary : Color.mOnPrimary)) :
                  (isHovered ? Color.mHover : (checked ? "transparent" : "transparent"))
 
-          border.width: showBackground ? 0 : (checked ? 1 : 0)
-          border.color: Color.mPrimary
+          border.width: 0
 
           Component.onCompleted: {
             topLeftRadius = Style.iRadiusM;
             bottomLeftRadius = Style.iRadiusM;
             topRightRadius = Style.iRadiusM;
             bottomRightRadius = Style.iRadiusM;
+          }
+
+          // custom underline rectangle when checked and no background
+          Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 12
+            anchors.rightMargin: 12
+            height: 1
+            color: (showBackground || !checked) ? "transparent" : Color.mPrimary
+            visible: !showBackground && checked
           }
 
           onClicked: {
@@ -248,9 +261,9 @@ DraggableDesktopWidget {
                     // Custom checkbox implementation with TapHandler
                     Item {
                       id: customCheckboxContainer
-                      width: scaledBaseWidgetSize * 0.7  // Slightly larger touch area
+                      width: scaledBaseWidgetSize * 0.7
                       height: scaledBaseWidgetSize * 0.7
-                      anchors.left: priorityIndicator.right  // Position relative to priority indicator
+                      anchors.left: priorityIndicator.right
                       anchors.verticalCenter: parent.verticalCenter
 
                       Rectangle {
@@ -290,7 +303,7 @@ DraggableDesktopWidget {
                       width: 3  // Width of the priority line
                       height: parent.height - scaledMarginS
                       anchors.left: parent.left
-                      anchors.leftMargin: scaledMarginM  // Increase margin to avoid overlap with checkbox
+                      anchors.leftMargin: scaledMarginM
                       anchors.verticalCenter: parent.verticalCenter
                       radius: 1.5
 
@@ -478,7 +491,7 @@ DraggableDesktopWidget {
     // Validate priority value
     var validPriorities = ["high", "medium", "low"];
     if (validPriorities.indexOf(priority) === -1) {
-      priority = "medium"; // Default to medium if invalid
+      priority = "medium";
     }
 
     // Simplified implementation using helper functions
