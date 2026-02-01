@@ -2,7 +2,5 @@
 
 var Providers = {
     GOOGLE: "google",
-    OPENAI: "openai",
-    OPENROUTER: "openrouter",
-    OLLAMA: "ollama"
+    OPENAI_COMPATIBLE: "openai_compatible"
 };

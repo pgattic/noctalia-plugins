@@ -44,11 +44,14 @@ ColumnLayout {
   property string editAttachmentStyle: pluginApi?.pluginSettings?.attachmentStyle || "connected"
   property real editScale: pluginApi?.pluginSettings?.scale || pluginApi?.manifest?.metadata?.defaultSettings?.scale || 1
 
+  // OpenAI Compatible specific settings
+  property bool editOpenAiLocal: pluginApi?.pluginSettings?.ai?.openaiLocal ?? false
+  property string editOpenAiBaseUrl: pluginApi?.pluginSettings?.ai?.openaiBaseUrl || "https://api.openai.com/v1/chat/completions"
+
   // Environment variable API keys - check if managed by env
   readonly property var envApiKeys: ({
       [Constants.Providers.GOOGLE]: Quickshell.env("NOCTALIA_AP_GOOGLE_API_KEY") || "",
-      [Constants.Providers.OPENAI]: Quickshell.env("NOCTALIA_AP_OPENAI_API_KEY") || "",
-      [Constants.Providers.OPENROUTER]: Quickshell.env("NOCTALIA_AP_OPENROUTER_API_KEY") || ""
+      [Constants.Providers.OPENAI_COMPATIBLE]: Quickshell.env("NOCTALIA_AP_OPENAI_COMPATIBLE_API_KEY") || ""
     })
   readonly property bool apiKeyManagedByEnv: (envApiKeys[editProvider] || "") !== ""
   readonly property string envDeeplApiKey: Quickshell.env("NOCTALIA_AP_DEEPL_API_KEY") || ""
@@ -205,22 +208,12 @@ ColumnLayout {
         "requiresKey": true,
         "keyUrl": "https://aistudio.google.com/app/apikey"
       },
-      [Constants.Providers.OPENAI]: {
-        "name": "OpenAI",
+      [Constants.Providers.OPENAI_COMPATIBLE]: {
+        "name": "OpenAI Compatible",
+        // Default to GPT-4o-mini but this is purely a placeholder as it depends on the actual backend
         "defaultModel": "gpt-4o-mini",
+        // requiresKey is dynamic based on "Local" toggle, handled in logic below
         "requiresKey": true,
-        "keyUrl": "https://platform.openai.com/api-keys"
-      },
-      [Constants.Providers.OPENROUTER]: {
-        "name": "OpenRouter",
-        "defaultModel": "anthropic/claude-3.5-sonnet",
-        "requiresKey": true,
-        "keyUrl": "https://openrouter.ai/"
-      },
-      [Constants.Providers.OLLAMA]: {
-        "name": "Ollama (Local)",
-        "defaultModel": "llama3.2",
-        "requiresKey": false,
         "keyUrl": ""
       }
     })
@@ -252,16 +245,8 @@ ColumnLayout {
         "name": "Google Gemini"
       },
       {
-        "key": Constants.Providers.OPENAI,
-        "name": "OpenAI"
-      },
-      {
-        "key": Constants.Providers.OPENROUTER,
-        "name": "OpenRouter"
-      },
-      {
-        "key": Constants.Providers.OLLAMA,
-        "name": "Ollama (Local)"
+        "key": Constants.Providers.OPENAI_COMPATIBLE,
+        "name": "OpenAI Compatible"
       }
     ]
     currentKey: root.editProvider
@@ -269,6 +254,46 @@ ColumnLayout {
       root.editProvider = key;
     }
     defaultValue: Constants.Providers.GOOGLE
+  }
+
+  // OpenAI Compatible Extras
+  ColumnLayout {
+    Layout.fillWidth: true
+    visible: root.editProvider === Constants.Providers.OPENAI_COMPATIBLE
+    spacing: Style.marginS
+
+    NToggle {
+      Layout.fillWidth: true
+      label: pluginApi?.tr("settings.local") || "Local"
+      description: pluginApi?.tr("settings.localDesc") || "Use a local inference server (e.g. Ollama, LM Studio)"
+      checked: root.editOpenAiLocal
+      onToggled: function (checked) {
+        root.editOpenAiLocal = checked;
+      }
+      defaultValue: false
+    }
+
+    NTextInput {
+      Layout.fillWidth: true
+      visible: true
+      label: pluginApi?.tr("settings.baseUrl") || "Base URL"
+      description: pluginApi?.tr("settings.baseUrlDesc") || "API Endpoint URL"
+      text: root.editOpenAiBaseUrl
+      placeholderText: "https://api.openai.com/v1/chat/completions"
+      onTextChanged: root.editOpenAiBaseUrl = text
+    }
+    
+    // Note about Base URL and response API
+    NText {
+      Layout.fillWidth: true
+      visible: true
+      text: (pluginApi?.tr("settings.baseUrlNote") || "Note: This plugin does not currently support the new OpenAI responses API. Go to ") +
+            "https://platform.openai.com/docs/api-reference/chat/create" + (pluginApi?.tr("settings.moreInfo") || " for more Info.")
+      color: Color.mOnSurfaceVariant
+      pointSize: Style.fontSizeXS
+      wrapMode: Text.Wrap
+      onLinkActivated: link => Qt.openUrlExternally(link)
+    }
   }
 
   // Model selection
@@ -295,10 +320,13 @@ ColumnLayout {
     placeholderText: providers[root.editProvider]?.defaultModel || ""
   }
 
-  // API Key input (hidden for Ollama)
+  // API Key input (hidden for Ollama/Local)
   NTextInput {
     Layout.fillWidth: true
-    visible: providers[root.editProvider]?.requiresKey ?? true
+    visible: {
+        if (root.editProvider === Constants.Providers.OPENAI_COMPATIBLE && root.editOpenAiLocal) return false;
+        return providers[root.editProvider]?.requiresKey ?? true;
+    }
     label: pluginApi?.tr("settings.apiKey") || "API Key"
     description: {
       if (root.apiKeyManagedByEnv) {
@@ -508,6 +536,10 @@ ColumnLayout {
     pluginApi.pluginSettings.ai.apiKeys = root.editApiKeys;
     pluginApi.pluginSettings.ai.temperature = root.editTemperature;
     pluginApi.pluginSettings.ai.systemPrompt = root.editSystemPrompt;
+    
+    // Save OpenAI Compatible specific settings
+    pluginApi.pluginSettings.ai.openaiLocal = root.editOpenAiLocal;
+    pluginApi.pluginSettings.ai.openaiBaseUrl = root.editOpenAiBaseUrl;
     // Also store legacy single-model value for compatibility
     try {
       pluginApi.pluginSettings.ai.model = root.editModels[root.editProvider] || pluginApi.pluginSettings.ai.model || "";

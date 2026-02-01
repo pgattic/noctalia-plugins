@@ -404,10 +404,8 @@ Item {
     switch (provider) {
     case Constants.Providers.GOOGLE:
       return "brand-google";
-    case Constants.Providers.OPENAI:
+    case Constants.Providers.OPENAI_COMPATIBLE:
       return "brand-openai";
-    case Constants.Providers.OLLAMA:
-      return "server";
     default:
       return "sparkles";
     }

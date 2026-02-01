@@ -38,20 +38,11 @@ Item {
         "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?key={apiKey}",
         "streamEndpoint": "https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?alt=sse&key={apiKey}"
       },
-      [Constants.Providers.OPENAI]: {
-        "name": "OpenAI",
+      [Constants.Providers.OPENAI_COMPATIBLE]: {
+        "name": "OpenAI Compatible",
         "defaultModel": "gpt-4o-mini",
-        "endpoint": "https://api.openai.com/v1/chat/completions"
-      },
-      [Constants.Providers.OPENROUTER]: {
-        "name": "OpenRouter",
-        "defaultModel": "anthropic/claude-3.5-sonnet",
-        "endpoint": "https://openrouter.ai/api/v1/chat/completions"
-      },
-      [Constants.Providers.OLLAMA]: {
-        "name": "Ollama (Local)",
-        "defaultModel": "llama3.2",
-        "endpoint": "http://localhost:11434/v1/chat/completions"
+        // Endpoint is dynamic based on settings (openaiBaseUrl)
+        "endpoint": "" 
       }
     })
 
@@ -68,8 +59,7 @@ Item {
   // Environment variable API keys - priority over settings
   readonly property var envApiKeys: ({
       [Constants.Providers.GOOGLE]: Quickshell.env("NOCTALIA_AP_GOOGLE_API_KEY") || "",
-      [Constants.Providers.OPENAI]: Quickshell.env("NOCTALIA_AP_OPENAI_API_KEY") || "",
-      [Constants.Providers.OPENROUTER]: Quickshell.env("NOCTALIA_AP_OPENROUTER_API_KEY") || ""
+      [Constants.Providers.OPENAI_COMPATIBLE]: Quickshell.env("NOCTALIA_AP_OPENAI_COMPATIBLE_API_KEY") || ""
     })
 
   // API Key Priority: Environment Variable > Local Settings
@@ -82,6 +72,14 @@ Item {
   readonly property string envDeeplApiKey: Quickshell.env("NOCTALIA_AP_DEEPL_API_KEY") || ""
   readonly property real temperature: pluginApi?.pluginSettings?.ai?.temperature || 0.7
   readonly property string systemPrompt: pluginApi?.pluginSettings?.ai?.systemPrompt || ""
+  
+  // OpenAI Compatible Settings
+  readonly property bool openaiLocal: pluginApi?.pluginSettings?.ai?.openaiLocal ?? false
+  readonly property string openaiBaseUrl: {
+      var url = pluginApi?.pluginSettings?.ai?.openaiBaseUrl || "";
+      if (url === "") return "https://api.openai.com/v1/chat/completions";
+      return url;
+  }
 
   Component.onCompleted: {
     Logger.i("AssistantPanel", "Plugin initialized");
@@ -205,7 +203,13 @@ Item {
     }
 
     // Check API key for non-local providers
-    if (provider !== Constants.Providers.OLLAMA && (!apiKey || apiKey.trim() === "")) {
+    // For OpenAI Compatible, check apiKey only if NOT local
+    var requiresKey = true;
+    if (provider === Constants.Providers.OPENAI_COMPATIBLE && openaiLocal) {
+        requiresKey = false;
+    }
+    
+    if (requiresKey && (!apiKey || apiKey.trim() === "")) {
       root.errorMessage = pluginApi?.tr("errors.noApiKey") || "Please configure your API key in settings";
       Logger.e("AssistantPanel", "sendMessage: missing API key");
       ToastService.showError(root.errorMessage);
@@ -223,11 +227,13 @@ Item {
     if (provider === Constants.Providers.GOOGLE) {
       Logger.i("AssistantPanel", "Calling sendGeminiRequest()");
       sendGeminiRequest();
-    } else if (provider === Constants.Providers.OPENAI || provider === Constants.Providers.OPENROUTER || provider === Constants.Providers.OLLAMA) {
+    } else if (provider === Constants.Providers.OPENAI_COMPATIBLE) {
       Logger.i("AssistantPanel", "Calling sendOpenAIRequest() for " + provider);
       sendOpenAIRequest();
     } else {
       Logger.e("AssistantPanel", "Unknown provider: " + provider);
+      root.errorMessage = "Unknown provider selected. Please check settings.";
+      root.isGenerating = false;
     }
   }
 
@@ -281,7 +287,7 @@ Item {
 
       if (provider === Constants.Providers.GOOGLE) {
         sendGeminiRequest();
-      } else if (provider === Constants.Providers.OPENAI || provider === Constants.Providers.OPENROUTER || provider === Constants.Providers.OLLAMA) {
+      } else if (provider === Constants.Providers.OPENAI_COMPATIBLE) {
         sendOpenAIRequest();
       }
     }
@@ -508,8 +514,8 @@ Item {
 
       if (exitCode !== 0 && root.currentResponse === "") {
         if (root.errorMessage === "") {
-          if (provider === Constants.Providers.OLLAMA) {
-            root.errorMessage = pluginApi?.tr("errors.ollamaNotRunning") || "Ollama is not running. Please start it with 'ollama serve'";
+          if (provider === Constants.Providers.OPENAI_COMPATIBLE && openaiLocal) {
+             root.errorMessage = pluginApi?.tr("errors.localNotRunning") || "Local inference server is not reachable. Please check your configuration and ensure it is running.";
           } else {
             root.errorMessage = pluginApi?.tr("errors.requestFailed") || "Request failed";
           }
@@ -529,13 +535,18 @@ Item {
     var history = buildConversationHistory();
     var payload = ProviderLogic.buildOpenAIPayload(model, systemPrompt, history, temperature);
 
-    var endpoint = providers[provider] && providers[provider].endpoint ? providers[provider].endpoint : providers[Constants.Providers.OPENAI].endpoint;
+    var endpoint = openaiBaseUrl;
+    
     Logger.i("AssistantPanel", "sendOpenAIRequest: endpoint=" + endpoint);
     Logger.i("AssistantPanel", "sendOpenAIRequest: payload=" + JSON.stringify(payload));
     openaiProcess.buffer = "";
 
     var cmd = ["curl", "-s", "-S", "--no-buffer", "-X", "POST", "-H", "Content-Type: application/json"];
 
+    // Add Authorization header if API key exists (even if local, some might want it, but usually not needed if local checked. 
+    // Logic above sets requiresKey=false for local, but here we just check if it exists to be safe/flexible).
+    // Actually, if local is checked, we might NOT want to send it if it's empty, or if user put something there.
+    // Let's rely on apiKey property which handles env vs settings.
     if (apiKey && apiKey.trim() !== "") {
       cmd.push("-H", "Authorization: Bearer " + apiKey);
     }
