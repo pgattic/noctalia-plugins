@@ -194,7 +194,6 @@ Item {
                                     onExited: TooltipService.hideImmediately();
                                 }
                             }
-
                         }
                     }
 

@@ -2,6 +2,12 @@
 
 Here I'll try to document all changes for the mpvpaper plugin.
 
+## 1.3.0 - 2026-02-02
+
+- feat: Added color generation by utilizing the thumbnails.
+- feat: Added a context menu for the bar widget, for easier toggling of the wallpaper.
+- fix: Fixed some bugs that gave a lot of warnings to the debug logs.
+
 ## 1.2.0 - 2026-02-01
 
 - feat: Added thumbnail generation for all the videos inside of the wallpaper folder, scaled down to save space.
