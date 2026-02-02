@@ -19,6 +19,13 @@
       "width": "Szerokość",
       "height": "Wysokość"
     },
+    "file_storage": {
+      "title": "Przechowywanie Plików",
+      "description": "Opcjonalnie zapisz zawartość notatnika do pliku zamiast ustawień wtyczki. Pozostaw puste, aby użyć domyślnego przechowywania.",
+      "select": "Wybierz plik",
+      "picker_title": "Wybierz plik dla notatnika",
+      "not_writable": "⚠ Ostrzeżenie: Brak uprawnień do zapisu w tej lokalizacji"
+    },
     "text_appearance": {
       "title": "Wygląd tekstu",
       "font_size": "Rozmiar czcionki"

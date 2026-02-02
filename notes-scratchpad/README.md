@@ -17,6 +17,7 @@ You can configure:
 - Panel Width
 - Panel Height
 - Font Size
+- Scratchpad file location
 
 ## License
 

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import qs.Commons
 import qs.Services.UI
 import qs.Widgets
@@ -17,13 +18,39 @@ Item {
   readonly property bool allowAttach: true
   anchors.fill: parent
 
+  // File storage path (if configured)
+  property string filePath: pluginApi?.pluginSettings?.filePath ?? ""
+  property bool useFileStorage: filePath !== ""
+
   // Local state for the text content
-  property string textContent: pluginApi?.pluginSettings?.scratchpadContent ?? ""
+  property string textContent: ""
   property int fontSize: pluginApi?.pluginSettings?.fontSize ?? 14
   property int savedCursorPosition: pluginApi?.pluginSettings?.cursorPosition ?? 0
   property real savedScrollX: pluginApi?.pluginSettings?.scrollPositionX ?? 0
   property real savedScrollY: pluginApi?.pluginSettings?.scrollPositionY ?? 0
   property bool restoringState: false
+
+  // FileView for external file storage
+  FileView {
+    id: externalFile
+    path: root.filePath
+    watchChanges: false
+
+    onLoaded: {
+      if (root.useFileStorage) {
+        root.textContent = text() || "";
+      }
+    }
+
+    onLoadFailed: function(error) {
+      if (error === 2) {
+        // File doesn't exist yet, will be created on save
+        Logger.d("NotesScratchpad", "File doesn't exist yet:", root.filePath);
+      } else {
+        Logger.w("NotesScratchpad", "Failed to load file:", root.filePath, "error:", error);
+      }
+    }
+  }
 
   // Auto-save timer
   Timer {
@@ -32,13 +59,32 @@ Item {
     repeat: false
     onTriggered: {
       if (pluginApi && !restoringState) {
-        pluginApi.pluginSettings.scratchpadContent = root.textContent;
-        pluginApi.pluginSettings.cursorPosition = textArea.cursorPosition;
-        pluginApi.pluginSettings.scrollPositionX = scrollView.ScrollBar.horizontal.position;
-        pluginApi.pluginSettings.scrollPositionY = scrollView.ScrollBar.vertical.position;
-        pluginApi.saveSettings();
+        saveContent();
       }
     }
+  }
+
+  function saveContent() {
+    if (!pluginApi) return;
+
+    if (root.useFileStorage) {
+      // Save to external file
+      try {
+        // Always ensure the content ends with a newline
+        externalFile.setText(root.textContent.endsWith("\n") ? root.textContent : root.textContent + "\n");
+      } catch (e) {
+        Logger.e("NotesScratchpad", "Failed to save to file:", e);
+      }
+    } else {
+      // Save to plugin settings
+      pluginApi.pluginSettings.scratchpadContent = root.textContent;
+    }
+
+    // Always save cursor and scroll positions to settings
+    pluginApi.pluginSettings.cursorPosition = textArea.cursorPosition;
+    pluginApi.pluginSettings.scrollPositionX = scrollView.ScrollBar.horizontal.position;
+    pluginApi.pluginSettings.scrollPositionY = scrollView.ScrollBar.vertical.position;
+    pluginApi.saveSettings();
   }
 
   onTextContentChanged: {
@@ -47,11 +93,24 @@ Item {
     }
   }
 
+  onFilePathChanged: {
+    // Reload content when file path changes
+    if (useFileStorage) {
+      externalFile.reload();
+    }
+  }
+
   Component.onCompleted: {
     restoringState = true;
     
     if (pluginApi) {
-      textContent = pluginApi.pluginSettings.scratchpadContent || "";
+      // Load content based on storage mode
+      if (root.useFileStorage) {
+        externalFile.reload();
+      } else {
+        textContent = pluginApi.pluginSettings.scratchpadContent || "";
+      }
+      
       savedCursorPosition = pluginApi.pluginSettings.cursorPosition ?? 0;
       savedScrollX = pluginApi.pluginSettings.scrollPositionX ?? 0;
       savedScrollY = pluginApi.pluginSettings.scrollPositionY ?? 0;
@@ -69,11 +128,7 @@ Item {
   Component.onDestruction: {
     // Save everything when the panel is closed
     if (pluginApi) {
-      pluginApi.pluginSettings.scratchpadContent = root.textContent;
-      pluginApi.pluginSettings.cursorPosition = textArea.cursorPosition;
-      pluginApi.pluginSettings.scrollPositionX = scrollView.ScrollBar.horizontal.position;
-      pluginApi.pluginSettings.scrollPositionY = scrollView.ScrollBar.vertical.position;
-      pluginApi.saveSettings();
+      saveContent();
     }
   }
 

@@ -19,6 +19,13 @@
       "width": "Largura",
       "height": "Altura"
     },
+    "file_storage": {
+      "title": "Armazenamento em Arquivo",
+      "description": "Opcionalmente salvar o conteúdo do rascunho em um arquivo em vez das configurações do plugin. Deixe vazio para usar o armazenamento padrão.",
+      "select": "Selecionar arquivo",
+      "picker_title": "Escolher arquivo para rascunho",
+      "not_writable": "⚠ Aviso: Sem permissão de escrita para este local"
+    },
     "text_appearance": {
       "title": "Aparência do texto",
       "font_size": "Tamanho da fonte"

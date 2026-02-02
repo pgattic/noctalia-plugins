@@ -19,6 +19,13 @@
       "width": "Szélesség",
       "height": "Magasság"
     },
+    "file_storage": {
+      "title": "Fájl Tárolás",
+      "description": "Opcionálisan mentse a jegyzettömb tartalmát fájlba a plugin beállítások helyett. Hagyja üresen az alapértelmezett tároláshoz.",
+      "select": "Fájl kiválasztása",
+      "picker_title": "Válasszon fájlt a jegyzettömböz",
+      "not_writable": "⚠ Figyelmeztetés: Nincs írási jogosultság ehhez a helyhez"
+    },
     "text_appearance": {
       "title": "Szöveg megjelenés",
       "font_size": "Betűméret"

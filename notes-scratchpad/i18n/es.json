@@ -19,6 +19,13 @@
       "width": "Ancho",
       "height": "Alto"
     },
+    "file_storage": {
+      "title": "Almacenamiento en Archivo",
+      "description": "Opcionalmente guardar el contenido del bloc de notas en un archivo en lugar de la configuración del plugin. Dejar vacío para usar el almacenamiento predeterminado.",
+      "select": "Seleccionar archivo",
+      "picker_title": "Elegir archivo para bloc de notas",
+      "not_writable": "⚠ Advertencia: Sin permiso de escritura para esta ubicación"
+    },
     "text_appearance": {
       "title": "Apariencia del texto",
       "font_size": "Tamaño de fuente"

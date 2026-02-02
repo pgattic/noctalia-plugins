@@ -21,17 +21,28 @@ Item {
   readonly property var mainInstance: pluginApi?.mainInstance
   readonly property bool isGenerating: mainInstance?.isGenerating || false
   readonly property int messageCount: mainInstance?.messages?.length || 0
+
+  // Property to check if an API key is configured
   readonly property bool hasApiKey: {
     var provider = pluginApi?.pluginSettings?.ai?.provider || Constants.Providers.GOOGLE;
-    if (provider === Constants.Providers.OLLAMA)
-      return true;
-    // Check environment variable first
-    var envVarName = "NOCTALIA_AP_" + provider.toUpperCase() + "_API_KEY";
+
+    // Check environment variable first (generic key check)
+    var envVarName = provider === Constants.Providers.GOOGLE ? "NOCTALIA_AP_GOOGLE_API_KEY" : "NOCTALIA_AP_OPENAI_COMPATIBLE_API_KEY";
+
     var envKey = Quickshell.env(envVarName) || "";
     if (envKey !== "")
       return true;
-    // Check settings
+
+    // Check specific provider setting
     var settingsKey = pluginApi?.pluginSettings?.ai?.apiKeys?.[provider] || "";
+
+    // For OpenAI Compatible Local mode, key is not required
+    if (provider === Constants.Providers.OPENAI_COMPATIBLE) {
+      var isLocal = pluginApi?.pluginSettings?.ai?.openaiLocal ?? false;
+      if (isLocal)
+        return true;
+    }
+
     return settingsKey.trim() !== "";
   }
 

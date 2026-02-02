@@ -19,6 +19,13 @@
       "width": "Width",
       "height": "Height"
     },
+    "file_storage": {
+      "title": "File Storage",
+      "description": "Optionally save scratchpad content to a file instead of plugin storage. Leave empty to use default storage.",
+      "select": "Select file",
+      "picker_title": "Choose file for scratchpad",
+      "not_writable": "⚠ Warning: No write permission for this location"
+    },
     "text_appearance": {
       "title": "Text Appearance",
       "font_size": "Font Size"

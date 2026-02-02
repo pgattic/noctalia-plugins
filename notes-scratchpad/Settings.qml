@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
 import qs.Commons
 import qs.Widgets
 
@@ -12,9 +14,50 @@ ColumnLayout {
   property int panelWidth: pluginApi?.pluginSettings?.panelWidth ?? 600
   property int panelHeight: pluginApi?.pluginSettings?.panelHeight ?? 400
   property int fontSize: pluginApi?.pluginSettings?.fontSize ?? 14
+  property string filePath: pluginApi?.pluginSettings?.filePath ?? ""
+  property bool filePathWritable: true
 
   spacing: Style.marginM
 
+  // Check file path writability
+  Process {
+    id: writeCheckProcess
+
+    onExited: function(exitCode, exitStatus) {
+      root.filePathWritable = (exitCode === 0);
+    }
+  }
+
+  function checkFilePathWritability() {
+    if (root.filePath === "") {
+      root.filePathWritable = true;
+      return;
+    }
+
+    // Check if file exists and is writable, or if parent directory is writable
+    var testCmd = "if [ -e \"" + root.filePath + "\" ]; then " +
+                  "[ -w \"" + root.filePath + "\" ]; " +
+                  "else " +
+                  "[ -w \"$(dirname \"" + root.filePath + "\")\" ]; " +
+                  "fi";
+    writeCheckProcess.exec(["sh", "-c", testCmd]);
+  }
+
+  function saveSettings() {
+    if (pluginApi) {
+      pluginApi.pluginSettings.panelWidth = root.panelWidth
+      pluginApi.pluginSettings.panelHeight = root.panelHeight
+      pluginApi.pluginSettings.fontSize = root.fontSize
+      pluginApi.pluginSettings.filePath = root.filePath
+      pluginApi.saveSettings();
+    }
+  }
+
+  onFilePathChanged: {
+    checkFilePathWritability();
+  }
+
+  // UI Components
   NLabel {
     label: pluginApi?.tr("settings.panel_dimensions.title") || "Panel Dimensions"
     description: pluginApi?.tr("settings.panel_dimensions.description") || "Configure the size of the scratchpad panel when it opens."
@@ -66,6 +109,31 @@ ColumnLayout {
           root.panelHeight = Math.round(value);
         }
       }
+    }
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+    Layout.topMargin: Style.marginM
+
+    NTextInputButton {
+      label: pluginApi?.tr("settings.file_storage.title") || "File Storage"
+      description: pluginApi?.tr("settings.file_storage.description") || "Optionally save scratchpad content to a file instead of plugin storage. Leave empty to use default storage."
+      placeholderText: "/home/user/notes.txt"
+      text: root.filePath
+      buttonIcon: "file"
+      buttonTooltip: pluginApi?.tr("settings.file_storage.select") || "Select file"
+      onInputEditingFinished: root.filePath = text
+      onButtonClicked: filePicker.openFilePicker()
+    }
+
+    NText {
+      visible: root.filePath !== "" && !root.filePathWritable
+      text: pluginApi?.tr("settings.file_storage.not_writable") || "⚠ Warning: No write permission for this location"
+      pointSize: Style.fontSizeS
+      color: Color.mError
+      Layout.fillWidth: true
     }
   }
 
@@ -131,12 +199,15 @@ ColumnLayout {
     }
   }
 
-  function saveSettings() {
-    if (pluginApi) {
-      pluginApi.pluginSettings.panelWidth = root.panelWidth
-      pluginApi.pluginSettings.panelHeight = root.panelHeight
-      pluginApi.pluginSettings.fontSize = root.fontSize
-      pluginApi.saveSettings()
+  NFilePicker {
+    id: filePicker
+    selectionMode: "files"
+    title: pluginApi?.tr("settings.file_storage.picker_title") || "Choose file for scratchpad"
+    initialPath: root.filePath || Quickshell.env("HOME")
+    onAccepted: paths => {
+      if (paths.length > 0) {
+        root.filePath = paths[0]
+      }
     }
   }
 }
