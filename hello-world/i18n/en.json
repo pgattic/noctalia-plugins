@@ -1,5 +1,22 @@
 {
+  "menu": {
+    "settings": "Widget settings"
+  },
   "panel": {
     "test": "This string is translated via the plugin API"
+  },
+  "settings": {
+    "iconColor": {
+      "desc": "Color of the bar widget icon.",
+      "label": "Icon color"
+    },
+    "message": {
+      "desc": "Custom message to display in the panel.",
+      "label": "Message",
+      "placeholder": "Enter a message..."
+    }
+  },
+  "widget": {
+    "tooltip": "Hello World"
   }
 }
